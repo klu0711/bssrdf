@@ -4,34 +4,7 @@
 #include "ray.h"
 #include <math.h>
 
-bool hitSphere(const Vector4D& center, float radius, const ray& r)
-{
-    Vector4D oc = r.origin() - center;
-    float a = r.direction().dotProduct(r.direction());
-    float b = (oc.dotProduct(r.direction()))*2.0;
-    float c = oc.dotProduct(oc) - radius*radius;
-    float d = b*b - 4*a*c;
-    if(d < 0)
-    {
-        return -1.0;
-    }else
-    {
-        return (-b-sqrt(d))/(2.0*a);
-    }
-   /* Vector4D oc = r.origin() - center;
-    float a = r.direction().dotProduct(r.direction());
-    float b = (oc.dotProduct(r.direction())) * 2.0;
-    float c = (oc.dotProduct(oc)) - (radius*radius);
-    float discriminant = (b*b) - (4*a*c);
-    if(discriminant < 0)
-    {
-        return - 1.0;
-    }
-    else
-    {
-        return (-b - sqrt(discriminant)) / (2.0*a);
-    }*/
-}
+
 
 Vector4D color(const ray& r)
 {
@@ -41,19 +14,11 @@ Vector4D color(const ray& r)
         Vector4D N = (r.pointAtParameter(t) - Vector4D(0,0,-1,1)).normalize();
         return (Vector4D(N[0]+1, N[1]+1, N[2]+1, 1)*0.5);
     }
+
     Vector4D unitDirection = r.direction().normalize();
     t = 0.5*(unitDirection[1] + 1.0);
     return Vector4D(1.0,1.0,1.0,1)*(1.0-t) + Vector4D(0.5,0.7,1.0,1)*t;
-    /*
-    float t = hitSphere(Vector4D(0,0,-1,1), 0.5, r);
-    if(t > 0.0)
-    {
-        Vector4D N = (r.pointAtParameter(t) - Vector4D(0,0,-1,1)).normalize();
-        return Vector4D(N[0] + 1, N[1] + 1, N[2] + 1, 1) * 0.5;
-    }
-    Vector4D unitDirection = r.direction().normalize();
-    t = 0.5*(unitDirection[1] + 1);
-    return Vector4D(1.0,1.0,1.0,1)*(1.0-t) + (Vector4D(0.5,0.7,1.0,1)*t);*/
+
 }
 
 int main() {

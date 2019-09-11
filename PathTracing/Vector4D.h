@@ -13,7 +13,8 @@
 		Vector4D operator+(const Vector4D& rhs) const;
 		Vector4D operator-(const Vector4D& rhs) const;
 		Vector4D operator*(const float& rhs) const;
-		void operator=(const Vector4D& rhs) ;
+		void operator=(const Vector4D& rhs);
+		Vector4D operator/(const float& rhs)const;
 		float operator[](const int index) const;
 		float & operator[](const int index);
 		float length() const;
@@ -63,6 +64,10 @@
 	{
 		return vector[index];
 	}
+	inline Vector4D Vector4D::operator/(const float &rhs) const
+	{
+        return Vector4D(vector[0]/rhs, vector[1]/rhs, vector[2]/rhs, 1);
+	}
 	inline void Vector4D::operator=(const Vector4D &rhs)
 	{
 	    vector[0] = rhs[0];
@@ -70,7 +75,7 @@
 	    vector[2] = rhs[2];
 	    vector[3] = rhs[3];
 	}
-	/// Calculates the lenth of the vector
+	/// Calculates the length of the vector
 	inline float Vector4D::length() const
 	{
 		return sqrt(pow(vector[0], 2) + pow(vector[1], 2) + pow(vector[2], 2));
@@ -100,7 +105,7 @@
 	{
 		return vector;
 	}
-	/// standard constructor to set all four values of the vactor
+	/// standard constructor to set all four values of the vector
 	inline Vector4D::Vector4D(float x, float y, float z, float w)
 	{
 		vector[0] = x;
