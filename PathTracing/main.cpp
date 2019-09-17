@@ -10,6 +10,40 @@
 #include "lambertian.h"
 #include "dielectric.h"
 
+hitable* random_scene()
+{
+    int n = 500;
+    hitable **list = new hitable*[n+1];
+    list[0] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
+    int i = 1;
+    for (int a = -11; a < 11; ++a)
+    {
+        for (int b = -11; b < 11; ++b)
+        {
+            float chooseMat = drand48();
+            Vector4D center(a+0.9*drand48(),0.2, b+0.9*drand48(), 1 );
+            if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
+            {
+                if(chooseMat < 0.8) //Diffuse
+                {
+                    list[i++] = new sphere(center, 0.2, new lambertian(Vector4D(drand48()*drand48(), drand48()*drand48(), drand48()*drand48(), 1)));
+                }else if(chooseMat < 0.95) // metal
+                {
+                    list[i++] = new sphere(center, 0.2,
+                            new metal(Vector4D(0.5*(1+drand48()), 0.5*(1+drand48()), 0.5*(1 + drand48()), 1), 0.5*drand48()));
+                }else
+                {
+                    list[i++] = new sphere(center, 0.2, new dielectric(1.5));
+                }
+            }
+        }
+    }
+    list[i++] = new sphere(Vector4D(0, 1, 0, 1), 1.0, new dielectric(1.5));
+    list[i++] = new sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
+    list[i++] = new sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
+    return new hitableList(list, i);
+}
+
 Vector4D color(const ray& r, hitable *world, int depth)
 {
     hitRecord rec;
@@ -35,28 +69,31 @@ Vector4D color(const ray& r, hitable *world, int depth)
 int main() {
     std::ofstream file;
     file.open("image.ppm");
-    int nx = 400;
-    int ny = 200;
-    int ns = 100;
+    int nx = 1000;
+    int ny = 500;
+    int ns = 500;
     file << "P3\n" << nx << " " << ny << "\n255\n";
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
-    /*hitable *list[5];
-    list[0] = new sphere(Vector4D(0,0,-1,1), 0.5, new lambertian(Vector4D(0.8, 0.3, 0.3, 1)));
+   // hitable *list[500];
+   /* list[0] = new sphere(Vector4D(0,0,-1,1), 0.5, new lambertian(Vector4D(0.8, 0.3, 0.3, 1)));
     list[1] = new sphere(Vector4D(0, -100.5,-1,1), 100, new lambertian(Vector4D(0.8, 0.8, 0.0, 1)));
     list[2] = new sphere(Vector4D(1, 0, -1,1), 0.5, new metal(Vector4D(0.8, 0.6, 0.2, 1), 0.3));
     list[3] = new sphere(Vector4D(-1, 0, -1, 1), 0.5, new dielectric(1.5));
-    list[4] = new sphere(Vector4D(-1, 0, -1, 1), -0.45, new dielectric(1.5));
-    hitable *world = new hitableList(list, 5);
-    camera cam;*/
-    hitable *list[5];
+    list[4] = new sphere(Vector4D(-1, 0, -1, 1), -0.45, new dielectric(1.5));*/
+    hitable * world = random_scene();
+    //hitable *world = new hitableList(list, 5);
     float R = cos(M_PI/4);
-    list[0] = new sphere(Vector4D(-R, 0, -1, 1), R, new lambertian(Vector4D(0,0,1, 1)));
-    list[1] = new sphere(Vector4D(R, 0, -1, 1), R, new lambertian(Vector4D(1,0,0, 1)));
-    hitable *world = new hitableList(list, 2);
-    camera cam(30, float(nx)/ny);
+    //list[0] = new sphere(Vector4D(-R, 0, -1, 1), R, new lambertian(Vector4D(0,0,1, 1)));
+    //list[1] = new sphere(Vector4D(R, 0, -1, 1), R, new lambertian(Vector4D(1,0,0, 1)));
+    //hitable *world = new hitableList(list, 2);
+    Vector4D lookfrom(13, 2, 3, 1);
+    Vector4D lookat(0, 0, 0, 1);
+    float distToFocus = 10;
+    float aperature = 0.1;
+    camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus);
     for (int j = ny -1; j >= 0 ; j--)
     {
         for (int i = 0; i < nx; ++i)
