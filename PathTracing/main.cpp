@@ -2,13 +2,9 @@
 #include "Vector4D.h"
 #include <fstream>
 #include "ray.h"
-#include <math.h>
 #include "hitableList.h"
 #include "sphere.h"
 #include "camera.h"
-#include "metal.h"
-#include "lambertian.h"
-#include "dielectric.h"
 
 hitable* random_scene()
 {
@@ -69,9 +65,9 @@ Vector4D color(const ray& r, hitable *world, int depth)
 int main() {
     std::ofstream file;
     file.open("image.ppm");
-    int nx = 1000;
-    int ny = 500;
-    int ns = 500;
+    int nx = 200;
+    int ny = 100;
+    int ns = 100;
     file << "P3\n" << nx << " " << ny << "\n255\n";
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
