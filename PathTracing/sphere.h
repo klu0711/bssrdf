@@ -8,6 +8,7 @@ class sphere : public hitable
 public:
     sphere(){};
     sphere(Vector4D cen, float r, material* mat) : center(cen), radius(r), matPtr(mat){}
+    //~sphere(){}
     virtual bool hit(const ray& r, float tmin, float tmax, hitRecord& rec) const;
     Vector4D center;
     float radius;

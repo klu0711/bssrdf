@@ -2,12 +2,30 @@
 #define S0008E_MATERIAL_H
 #include "ray.h"
 #include "hitable.h"
+
+uint64_t s[2] = {0,1};
+
+float xorShift(void)
+{
+    static uint x = 123456789;
+    static uint y = 362436069;
+    static uint z = 521288629;
+    static uint w = 88675123;
+    uint t;
+    t = x ^ (x << 11);
+    x = y;
+    y = z;
+    z = w;
+    w = w ^ (w >> 19) ^ (t ^ (t >> 8));
+
+    return static_cast<float>(w) / static_cast<float>(0xffffffff);
+}
 Vector4D randomInUnitSphere()
 {
     Vector4D p;
     do
     {
-        p = Vector4D(drand48(), drand48(), drand48(), 1)*2 - Vector4D(1, 1, 1, 1);
+        p = Vector4D(xorShift(), xorShift(), xorShift(), 1)*2 - Vector4D(1, 1, 1, 1);
     }while(p.squaredLength() >= 1.0);
     return p;
 }

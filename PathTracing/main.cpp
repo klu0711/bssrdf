@@ -1,38 +1,41 @@
 #include <iostream>
 #include "Vector4D.h"
 #include <fstream>
+#include <chrono>
+#include <assert.h>
 #include "ray.h"
 #include "hitableList.h"
 #include "sphere.h"
 #include "camera.h"
 
-hitable* random_scene()
+
+
+
+hitable* random_scene(int spheres)
 {
-    int n = 500;
-    hitable **list = new hitable*[n+1];
+    hitable **list = new hitable*[spheres+4];
     list[0] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
     int i = 1;
-    for (int a = -11; a < 11; ++a)
+
+    for (int b = 0; b < spheres; ++b)
     {
-        for (int b = -11; b < 11; ++b)
+        float chooseMat = xorShift();
+        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
+        if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
         {
-            float chooseMat = drand48();
-            Vector4D center(a+0.9*drand48(),0.2, b+0.9*drand48(), 1 );
-            if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
+            if(chooseMat < 0.8) //Diffuse
             {
-                if(chooseMat < 0.8) //Diffuse
-                {
-                    list[i++] = new sphere(center, 0.2, new lambertian(Vector4D(drand48()*drand48(), drand48()*drand48(), drand48()*drand48(), 1)));
-                }else if(chooseMat < 0.95) // metal
-                {
-                    list[i++] = new sphere(center, 0.2,
-                            new metal(Vector4D(0.5*(1+drand48()), 0.5*(1+drand48()), 0.5*(1 + drand48()), 1), 0.5*drand48()));
-                }else
-                {
-                    list[i++] = new sphere(center, 0.2, new dielectric(1.5));
-                }
+                list[i++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+            }else if(chooseMat < 0.95) // metal
+            {
+                list[i++] = new sphere(center, 0.2,
+                        new metal(Vector4D(0.5*(1+xorShift()), 0.5*(1+xorShift()), 0.5*(1 + xorShift()), 1), 0.5*xorShift()));
+            }else
+            {
+                list[i++] = new sphere(center, 0.2, new dielectric(1.5));
             }
         }
+
     }
     list[i++] = new sphere(Vector4D(0, 1, 0, 1), 1.0, new dielectric(1.5));
     list[i++] = new sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
@@ -62,29 +65,48 @@ Vector4D color(const ray& r, hitable *world, int depth)
     }
 }
 
-int main() {
-    std::ofstream file;
-    file.open("image.ppm");
-    int nx = 1000;
-    int ny = 500;
-    int ns = 300;
-    file << "P3\n" << nx << " " << ny << "\n255\n";
+int main(int argCount, char* argVector[]) {
+
+    auto start = std::chrono::system_clock::now();
+
+    int nx, ny, ns, sp;
+    unsigned int numRays;
+    for(int i = 1; i < argCount; i++)
+    {
+        std::string argument = argVector[i];
+        if("-i" == argument)
+        {
+            nx = atoi(argVector[i+1]);
+            ny = atoi(argVector[i+2]);
+            i += 2;
+        }
+        else if("-r" == argument)
+        {
+            ns = atoi(argVector[i + 1]);
+            i++;
+        }
+        else if("-s" == argument)
+        {
+            sp = atoi(argVector[i + 1]);
+            i++;
+        }
+        else
+            assert("Error detected in input");
+    }
+    nx = 200;
+    ny = 100;
+    ns = 100;
+    sp = 20;
+    //std::ofstream file;
+    //file.open("image.ppm");
+    //file << "P3\n" << nx << " " << ny << "\n255\n";
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
-   // hitable *list[500];
-   /* list[0] = new sphere(Vector4D(0,0,-1,1), 0.5, new lambertian(Vector4D(0.8, 0.3, 0.3, 1)));
-    list[1] = new sphere(Vector4D(0, -100.5,-1,1), 100, new lambertian(Vector4D(0.8, 0.8, 0.0, 1)));
-    list[2] = new sphere(Vector4D(1, 0, -1,1), 0.5, new metal(Vector4D(0.8, 0.6, 0.2, 1), 0.3));
-    list[3] = new sphere(Vector4D(-1, 0, -1, 1), 0.5, new dielectric(1.5));
-    list[4] = new sphere(Vector4D(-1, 0, -1, 1), -0.45, new dielectric(1.5));*/
-    hitable * world = random_scene();
-    //hitable *world = new hitableList(list, 5);
+
+    hitable * world = random_scene(sp);
     float R = cos(M_PI/4);
-    //list[0] = new sphere(Vector4D(-R, 0, -1, 1), R, new lambertian(Vector4D(0,0,1, 1)));
-    //list[1] = new sphere(Vector4D(R, 0, -1, 1), R, new lambertian(Vector4D(1,0,0, 1)));
-    //hitable *world = new hitableList(list, 2);
     Vector4D lookfrom(13, 2, 3, 1);
     Vector4D lookat(0, 0, 0, 1);
     float distToFocus = 10;
@@ -97,9 +119,10 @@ int main() {
             Vector4D col(0,0,0,1);
             for (int k = 0; k < ns; ++k)
             {
-                float u = float(i + drand48())/float(nx);
-                float v = float(j + drand48())/float(ny);
+                float u = float(i + xorShift())/float(nx);
+                float v = float(j + xorShift())/float(ny);
                 ray r = cam.getRay(u, v);
+                numRays++;
                 Vector4D p = r.pointAtParameter(2.0);
                 col = col + color(r, world, 0);
             }
@@ -108,8 +131,11 @@ int main() {
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
-            file << ir << " " << ig << " " << ib << "\n";
+            //file << ir << " " << ig << " " << ib << "\n";
         }
     }
-    file.close();
+    auto end = std::chrono::system_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
+    std::cout << "Rays: " << (float)numRays/(float)1000000 << " M rays" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
+    //file.close();
 }

@@ -6,7 +6,7 @@ Vector4D randomInUnitDisk()
 {
     Vector4D p;
     do{
-        p = Vector4D(drand48(), drand48(), 0, 1)*2.0 - Vector4D(1, 1, 0, 1);
+        p = Vector4D(xorShift(), xorShift(), 0, 1)*2.0 - Vector4D(1, 1, 0, 1);
     }while(p.dotProduct(p) >= 1.0);
 
     return p;
