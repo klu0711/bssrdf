@@ -3,11 +3,12 @@
 #include <fstream>
 #include <chrono>
 #include <assert.h>
+#include <algorithm>
 #include "ray.h"
 #include "hitableList.h"
 #include "sphere.h"
 #include "camera.h"
-
+#include <thread>
 
 
 
@@ -64,6 +65,53 @@ Vector4D color(const ray& r, hitable *world, int depth)
         return Vector4D(1.0,1.0,1.0,1)*(1.0-t) + Vector4D(0.5,0.7,1.0,1)*t;
     }
 }
+struct pixel
+{
+    int x, y;
+    int r;
+    int g;
+    int b;
+};
+
+struct pixelContainer
+{
+    int currentAvailable = 0;
+    pixel* pixels;
+    int numPixels;
+    pixel* getPixel()
+    {
+        pixel* returnValue;
+        (currentAvailable >= (numPixels - 1)) ? returnValue = NULL : returnValue = &pixels[currentAvailable++];
+        return returnValue;
+    }
+};
+void calcPixel(pixelContainer p, int ns, hitable * world, int nx, int ny, camera cam)
+{
+    while(1)
+    {
+        pixel* currentPixel = p.getPixel();
+        if(currentPixel == NULL)
+            break;
+        Vector4D col(0,0,0,1);
+        for (int i = 0; i < ns; ++i)
+        {
+            float u = float(currentPixel->x + xorShift())/float(nx);
+            float v = float(currentPixel->y + xorShift())/float(ny);
+            ray r = cam.getRay(u, v);
+            Vector4D p = r.pointAtParameter(2.0);
+            col = col + color(r, world, 0);
+
+        }
+        col = col / float(ns);
+        col = Vector4D(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]), 1);
+        currentPixel->r = int(255.99*col[0]);
+        currentPixel->g = int(255.99*col[1]);
+        currentPixel->b = int(255.99*col[2]);
+
+    }
+
+}
+
 
 int main(int argCount, char* argVector[]) {
 
@@ -112,7 +160,29 @@ int main(int argCount, char* argVector[]) {
     float distToFocus = 10;
     float aperature = 0.1;
     camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus);
-    for (int j = ny -1; j >= 0 ; j--)
+    pixelContainer cont;
+    cont.pixels = new pixel[nx*ny];
+    cont.numPixels = nx*ny;
+
+    for (int l = ny - 1; l >= 0 ; --l)
+    {
+        for (int i = 0; i < nx; ++i)
+        {
+            int nYnX = ny*nx;
+            cont.pixels[nYnX].x = nx;
+            cont.pixels[nYnX].y = ny;
+
+        }
+    }
+    std::thread threads[6];
+    for (int m = 0; m < 6; ++m)
+    {
+        threads[m] = std::thread(calcPixel, cont, ns, world, nx, ny, cam);
+        threads[m].join();
+    }
+
+
+   /* for (int j = ny -1; j >= 0 ; j--)
     {
         for (int i = 0; i < nx; ++i)
         {
@@ -133,9 +203,14 @@ int main(int argCount, char* argVector[]) {
             int ib = int(255.99*col[2]);
             //file << ir << " " << ig << " " << ib << "\n";
         }
-    }
+    }*/
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M rays" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
+
+    delete world;
+    delete[] cont.pixels;
     //file.close();
 }
+
+

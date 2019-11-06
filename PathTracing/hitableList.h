@@ -5,7 +5,14 @@ class hitableList : public hitable
 {
 public:
     hitableList() {}
-    //~hitableList(){delete list;}
+    ~hitableList()
+    {
+        for (int i = 0; i < listSize; ++i)
+        {
+            delete list[i];
+        }
+        delete[] list;
+    }
     hitableList(hitable **l, int n) {list = l; listSize = n;}
     virtual bool hit(const ray&, float tmin, float tmax, hitRecord& rec) const;
     hitable **list;
