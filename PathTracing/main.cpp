@@ -9,6 +9,7 @@
 #include "sphere.h"
 #include "camera.h"
 #include <thread>
+#include <vector>
 
 
 
@@ -76,21 +77,29 @@ struct pixel
 struct pixelContainer
 {
     int currentAvailable = 0;
-    pixel* pixels;
+    std::vector<pixel> pixels;
     int numPixels;
     pixel* getPixel()
     {
         pixel* returnValue;
-        (currentAvailable >= (numPixels - 1)) ? returnValue = NULL : returnValue = &pixels[currentAvailable++];
+        if(currentAvailable >= (numPixels - 1))
+        {
+            returnValue = nullptr;
+            currentAvailable++;
+        }else
+        {
+            returnValue = &pixels[currentAvailable++];
+        }
         return returnValue;
     }
 };
-void calcPixel(pixelContainer p, int ns, hitable * world, int nx, int ny, camera cam)
+pixelContainer cont;
+void calcPixel(int ns, hitable * world, int nx, int ny, camera cam)
 {
     while(1)
     {
-        pixel* currentPixel = p.getPixel();
-        if(currentPixel == NULL)
+        pixel* currentPixel = cont.getPixel();
+        if(currentPixel == nullptr)
             break;
         Vector4D col(0,0,0,1);
         for (int i = 0; i < ns; ++i)
@@ -107,9 +116,7 @@ void calcPixel(pixelContainer p, int ns, hitable * world, int nx, int ny, camera
         currentPixel->r = int(255.99*col[0]);
         currentPixel->g = int(255.99*col[1]);
         currentPixel->b = int(255.99*col[2]);
-
     }
-
 }
 
 
@@ -141,13 +148,13 @@ int main(int argCount, char* argVector[]) {
         else
             assert("Error detected in input");
     }
-    nx = 200;
-    ny = 100;
-    ns = 100;
-    sp = 20;
-    //std::ofstream file;
-    //file.open("image.ppm");
-    //file << "P3\n" << nx << " " << ny << "\n255\n";
+    nx = 480;
+    ny = 320;
+    ns = 10;
+    sp = 100;
+    std::ofstream file;
+    file.open("image.ppm");
+    file << "P3\n" << nx << " " << ny << "\n255\n";
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
     Vector4D vertical(0.0,2.0,0.0,1);
@@ -160,25 +167,37 @@ int main(int argCount, char* argVector[]) {
     float distToFocus = 10;
     float aperature = 0.1;
     camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus);
-    pixelContainer cont;
-    cont.pixels = new pixel[nx*ny];
+
+    cont.pixels.resize(ny*nx);
     cont.numPixels = nx*ny;
 
-    for (int l = ny - 1; l >= 0 ; --l)
+    for (int l = ny - 1; l >= 0 ;l--)
     {
         for (int i = 0; i < nx; ++i)
         {
-            int nYnX = ny*nx;
-            cont.pixels[nYnX].x = nx;
-            cont.pixels[nYnX].y = ny;
+            int nYnX = l*nx + i;
+            cont.pixels[nYnX].x = i;
+            cont.pixels[nYnX].y = l;
 
         }
     }
     std::thread threads[6];
     for (int m = 0; m < 6; ++m)
     {
-        threads[m] = std::thread(calcPixel, cont, ns, world, nx, ny, cam);
-        threads[m].join();
+        threads[m] = std::thread(calcPixel, ns, world, nx, ny, cam);
+    }
+    for (int j = 0; j < 6; ++j)
+    {
+        threads[j].join();
+    }
+
+
+    for (int j =  ny - 1; j >= 0 ; j--)
+    {
+        for (int i = 0; i < nx; ++i)
+        {
+            file << cont.pixels[j*nx + i].r << " " << cont.pixels[j*nx + i].g << " " << cont.pixels[j*nx + i].b << "\n";
+        }
     }
 
 
@@ -209,8 +228,8 @@ int main(int argCount, char* argVector[]) {
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M rays" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
 
     delete world;
-    delete[] cont.pixels;
-    //file.close();
+
+    file.close();
 }
 
 
