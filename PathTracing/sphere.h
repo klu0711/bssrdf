@@ -45,5 +45,55 @@ bool sphere::hit(const ray &r, float tmin, float tmax, hitRecord &rec) const
     return false;
 }
 
+class movingSphere : public hitable
+{
+public:
+    movingSphere(){}
+    movingSphere(Vector4D cen0, Vector4D cen1, float t0, float t1, float r, material *m) : center0(cen0), center1(cen1), time0(t0), time1(t1), radius(r), matPtr(m) {};
+    virtual bool hit(const ray& r, float tmin, float tmax, hitRecord& rec) const;
+    Vector4D center(float time) const;
+
+    Vector4D center0, center1;
+    float time0, time1;
+    float radius;
+    material *matPtr;
+};
+
+Vector4D movingSphere::center(float time) const
+{
+    return center0 +  (center1 - center0) * ((time - time0) / (time1 + time0));
+}
+
+bool movingSphere::hit(const ray &r, float tmin, float tmax, hitRecord &rec) const
+{
+    Vector4D oc = r.origin() -  center(r.time());
+    float a = r.direction().dotProduct(r.direction());
+    float b = (oc.dotProduct(r.direction()));
+    float c = oc.dotProduct(oc) - radius*radius;
+    float d = b*b - a*c;
+    if(d > 0)
+    {
+        float temp = (-b - sqrt(b*b-a*c))/a;
+        if(temp < tmax && temp > tmin)
+        {
+            rec.t = temp;
+            rec.p = r.pointAtParameter(rec.t);
+            rec.normal = (rec.p-center(r.time()))/radius;
+            rec.matPtr = this->matPtr;
+            return true;
+        }
+        temp = (-b + sqrt(b*b-a*c))/a;
+        if(temp < tmax && temp > tmin)
+        {
+            rec.t = temp;
+            rec.p = r.pointAtParameter(rec.t);
+            rec.normal = (rec.p-center(r.time()))/radius;
+            rec.matPtr = this->matPtr;
+            return true;
+        }
+    }
+    return false;
+}
+
 
 #endif //S0008E_SPHERE_H

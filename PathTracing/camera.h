@@ -14,8 +14,10 @@ Vector4D randomInUnitDisk()
 
 class camera {
 public:
-    camera(Vector4D lookfrom, Vector4D lookat, Vector4D vup, float vfov, float aspect, float aperature, float focusDist)
+    camera(Vector4D lookfrom, Vector4D lookat, Vector4D vup, float vfov, float aspect, float aperature, float focusDist, float t0, float t1)
     {
+        time0 = t0;
+        time1 = t1;
         lensRadius = aperature/2;
         float theta = vfov*M_PI/180;
         float halfHeight = tan(theta/2);
@@ -33,7 +35,8 @@ public:
     {
         Vector4D rd = randomInUnitDisk()*lensRadius;
         Vector4D offset = u*rd[0] + v*rd[1];
-        return ray(origin + offset, lowerLeftCorner + horizontal*s + vertical*t - origin - offset);
+        float time = time0 + drand48()*(time1-time0);
+        return ray(origin + offset, lowerLeftCorner + horizontal*s + vertical*t - origin - offset, time);
     }
     Vector4D origin;
     Vector4D lowerLeftCorner;
@@ -41,6 +44,7 @@ public:
     Vector4D vertical;
     Vector4D u, v, w;
     float lensRadius;
+    float time0, time1;
 };
 
 #endif //S0008E_CAMERA_H

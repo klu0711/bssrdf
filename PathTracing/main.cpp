@@ -13,12 +13,10 @@
 
 
 
-hitable* random_scene(int spheres, void* mem, char* memOffset)
+hitable* random_scene(int spheres)
 {
-    hitable **list = new(mem + memOffset) hitable*[spheres+4];
-    memOffset += sizeof(list);
-    list[0] = new(mem) sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
-    memOffset += sizeof(sphere);
+    hitable **list = new hitable*[spheres+4];
+    list[0] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
     int i = 1;
 
     for (int b = 0; b < spheres; ++b)
@@ -29,22 +27,23 @@ hitable* random_scene(int spheres, void* mem, char* memOffset)
         {
             if(chooseMat < 0.8) //Diffuse
             {
-                list[i++] = new(mem) sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
-                memOffset += sizeof(sphere);
+                //list[i++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+                list[i++] = new movingSphere(center, center + Vector4D(0, 0.5*xorShift(), 0, 1), 0.0, 1.0, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+
             }else if(chooseMat < 0.95) // metal
             {
-                list[i++] = new(mem) sphere(center, 0.2,
+                list[i++] = new sphere(center, 0.2,
                         new metal(Vector4D(0.5*(1+xorShift()), 0.5*(1+xorShift()), 0.5*(1 + xorShift()), 1), 0.5*xorShift()));
             }else
             {
-                list[i++] = new(mem) sphere(center, 0.2, new dielectric(1.5));
+                list[i++] = new sphere(center, 0.2, new dielectric(1.5));
             }
         }
 
     }
-    list[i++] = new(mem) sphere(Vector4D(0, 1, 0, 1), 1.0, new dielectric(1.5));
-    list[i++] = new(mem) sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
-    list[i++] = new(mem) sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
+    list[i++] = new sphere(Vector4D(0, 1, 0, 1), 1.0, new dielectric(1.5));
+    list[i++] = new sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
+    list[i++] = new sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
     return new hitableList(list, i);
 }
 
@@ -129,33 +128,10 @@ int main(int argCount, char* argVector[]) {
 
     auto start = std::chrono::system_clock::now();
     int nx, ny, ns, sp;
-
-    for(int i = 1; i < argCount; i++)
-    {
-        std::string argument = argVector[i];
-        if("-i" == argument)
-        {
-            nx = atoi(argVector[i+1]);
-            ny = atoi(argVector[i+2]);
-            i += 2;
-        }
-        else if("-r" == argument)
-        {
-            ns = atoi(argVector[i + 1]);
-            i++;
-        }
-        else if("-s" == argument)
-        {
-            sp = atoi(argVector[i + 1]);
-            i++;
-        }
-        else
-            assert("Error detected in input");
-    }
-    nx = 200;
-    ny = 100;
+    nx = 400;
+    ny = 200;
     ns = 100;
-    sp = 20;
+    sp = 300;
     std::ofstream file;
     file.open("image.ppm");
     file << "P3\n" << nx << " " << ny << "\n255\n";
@@ -164,15 +140,13 @@ int main(int argCount, char* argVector[]) {
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
 
-    void* memory = malloc(512 * 1000 * 1000);
-    int memOffset = 0;
-    hitable * world = random_scene(sp, memory);
+    hitable * world = random_scene(sp);
     float R = cos(M_PI/4);
     Vector4D lookfrom(13, 2, 3, 1);
     Vector4D lookat(0, 0, 0, 1);
     float distToFocus = 10;
     float aperature = 0.1;
-    camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus);
+    camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus, 0.0f, 1.0f);
 
     cont.pixels.resize(ny*nx);
     cont.numPixels = nx*ny;
@@ -234,7 +208,6 @@ int main(int argCount, char* argVector[]) {
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M rays" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
 
     delete world;
-    free(memory);
     file.close();
 }
 
