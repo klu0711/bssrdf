@@ -11,7 +11,7 @@ inline float ffmax(float a, float b){return a > b ? a : b;}
 class aabb
 {
 public:
-    aabb();
+    aabb(){}
     aabb(const Vector4D& a, const Vector4D& b) {_min = a; _max = b;}
 
     Vector4D min() const {return _min;}
@@ -37,6 +37,18 @@ inline bool aabb::hit(const ray& r, float tmin, float tmax) const
             return false;
     }
     return true;
+}
+
+aabb surroundingBox(aabb box0, aabb box1)
+{
+    Vector4D small(fmin(box0.min()[0], box1.min()[0]),
+                   fmin(box0.min()[1], box1.min()[1]),
+                   fmin(box0.min()[2], box1.min()[2]),1);
+
+    Vector4D big(fmin(box0.max()[0], box1.max()[0]),
+                 fmin(box0.max()[1], box1.max()[1]),
+                 fmin(box0.max()[2], box1.max()[2]),1);
+    return aabb(small, big);
 }
 
 #endif //S0008E_AABB_H
