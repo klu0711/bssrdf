@@ -205,7 +205,7 @@ int main(int argCount, char* argVector[]) {
     }*/
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-    std::cout << "Rays: " << (float)numRays/(float)1000000 << " M rays" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
+    std::cout << "Rays: " << (float)numRays/(float)1000000 << " M" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
 
     delete world;
     file.close();
