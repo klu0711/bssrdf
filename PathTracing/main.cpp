@@ -193,7 +193,7 @@ int main(int argCount, char* argVector[]) {
 
         }
     }
-  /*  int numThreads = 12;
+    int numThreads = 12;
     std::thread threads[numThreads];
     for (int m = 0; m < numThreads; ++m)
     {
@@ -202,19 +202,19 @@ int main(int argCount, char* argVector[]) {
     for (int j = 0; j < numThreads; ++j)
     {
         threads[j].join();
-    }*/
+    }
 
 
-   //for (int j =  ny - 1; j >= 0 ; j--)
-   // {
-  //      for (int i = 0; i < nx; ++i)
-  //      {
-  //          file << cont.pixels[j*nx + i].r << " " << cont.pixels[j*nx + i].g << " " << cont.pixels[j*nx + i].b << "\n";
-  //      }
-  //  }
+   for (int j =  ny - 1; j >= 0 ; j--)
+   {
+        for (int i = 0; i < nx; ++i)
+        {
+            file << cont.pixels[j*nx + i].r << " " << cont.pixels[j*nx + i].g << " " << cont.pixels[j*nx + i].b << "\n";
+        }
+    }
 
 
-    for (int j = ny -1; j >= 0 ; j--)
+   /* for (int j = ny -1; j >= 0 ; j--)
     {
         for (int i = 0; i < nx; ++i)
         {
@@ -235,7 +235,7 @@ int main(int argCount, char* argVector[]) {
             int ib = int(255.99*col[2]);
             file << ir << " " << ig << " " << ib << "\n";
         }
-    }
+    }*/
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
