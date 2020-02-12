@@ -45,9 +45,9 @@ aabb surroundingBox(aabb box0, aabb box1)
                    fmin(box0.min()[1], box1.min()[1]),
                    fmin(box0.min()[2], box1.min()[2]),1);
 
-    Vector4D big(fmin(box0.max()[0], box1.max()[0]),
-                 fmin(box0.max()[1], box1.max()[1]),
-                 fmin(box0.max()[2], box1.max()[2]),1);
+    Vector4D big(fmax(box0.max()[0], box1.max()[0]),
+                 fmax(box0.max()[1], box1.max()[1]),
+                 fmax(box0.max()[2], box1.max()[2]),1);
     return aabb(small, big);
 }
 

@@ -12,7 +12,7 @@ int boxXCompare(const void * a, const void * b)
     hitable* bh = *(hitable**)b;
     if(!ah->boundingBox(0,0,boxLeft) || !bh->boundingBox(0,0, boxRight))
         std::cerr << "error" << std::endl;
-    if(boxLeft.min()[0] - boxRight.min()[0] < 0.0f)
+    if(boxLeft.min()[0] - boxRight.min()[0] < 0.0)
         return -1;
     else
         return 1;
@@ -25,7 +25,7 @@ int boxYCompare(const void * a, const void * b)
     hitable* bh = *(hitable**)b;
     if(!ah->boundingBox(0,0,boxLeft) || !bh->boundingBox(0,0, boxRight))
         std::cerr << "error" << std::endl;
-    if(boxLeft.min()[1] - boxRight.min()[1] < 0.0f)
+    if(boxLeft.min()[1] - boxRight.min()[1] < 0.0)
         return -1;
     else
         return 1;
@@ -38,7 +38,7 @@ int boxZCompare(const void * a, const void * b)
     hitable* bh = *(hitable**)b;
     if(!ah->boundingBox(0,0,boxLeft) || !bh->boundingBox(0,0, boxRight))
         std::cerr << "error" << std::endl;
-    if(boxLeft.min()[2] - boxRight.min()[2] < 0.0f)
+    if(boxLeft.min()[2] - boxRight.min()[2] < 0.0)
         return -1;
     else
         return 1;
@@ -63,7 +63,7 @@ bvhNode::bvhNode(hitable **l, int n, float time0, float time1)
         qsort(l, n, sizeof(hitable*), boxXCompare);
     else if(axis == 1)
         qsort(l, n, sizeof(hitable*), boxYCompare);
-    else if(axis == 2)
+    else
         qsort(l, n, sizeof(hitable*), boxZCompare);
     if(n == 1)
         left = right = l[0];

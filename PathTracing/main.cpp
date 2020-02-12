@@ -10,6 +10,7 @@
 #include "camera.h"
 #include <thread>
 #include <vector>
+#include "node.h"
 
 
 
@@ -45,6 +46,36 @@ hitable* random_scene(int spheres)
     list[i++] = new sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
     list[i++] = new sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
     return new hitableList(list, i);
+}
+
+hitable* generateScene()
+{
+    int spheres = 100;
+    hitable **list = new hitable*[101];
+    hitable ** sphereList = new hitable*[spheres];
+    hitable ** sphereList2 = new hitable*[spheres];
+    int b = 0;
+    for (int i = 0; i < spheres; ++i)
+    {
+        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
+        if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
+        {
+            sphereList[b++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+        }
+    }
+
+    //sphereList[b++] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
+    list[0] = new bvhNode(sphereList, b, 0, 1);
+    int a = 1;
+    for (int i = 0; i < 10; ++i)
+    {
+        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
+
+       // list[a++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+
+    }
+
+    return new hitableList(list, 1);
 }
 
 Vector4D color(const ray& r, hitable *world, int depth)
@@ -128,10 +159,10 @@ int main(int argCount, char* argVector[]) {
 
     auto start = std::chrono::system_clock::now();
     int nx, ny, ns, sp;
-    nx = 400;
-    ny = 200;
-    ns = 100;
-    sp = 300;
+    nx = 200;
+    ny = 100;
+    ns = 10;
+    sp = 10;
     std::ofstream file;
     file.open("image.ppm");
     file << "P3\n" << nx << " " << ny << "\n255\n";
@@ -140,7 +171,8 @@ int main(int argCount, char* argVector[]) {
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
 
-    hitable * world = random_scene(sp);
+    hitable *world1 = random_scene(sp);
+    hitable *world = generateScene();
     float R = cos(M_PI/4);
     Vector4D lookfrom(13, 2, 3, 1);
     Vector4D lookat(0, 0, 0, 1);
@@ -161,27 +193,28 @@ int main(int argCount, char* argVector[]) {
 
         }
     }
-    std::thread threads[6];
-    for (int m = 0; m < 6; ++m)
+  /*  int numThreads = 12;
+    std::thread threads[numThreads];
+    for (int m = 0; m < numThreads; ++m)
     {
         threads[m] = std::thread(calcPixel, ns, world, nx, ny, cam);
     }
-    for (int j = 0; j < 6; ++j)
+    for (int j = 0; j < numThreads; ++j)
     {
         threads[j].join();
-    }
+    }*/
 
 
-   for (int j =  ny - 1; j >= 0 ; j--)
-    {
-        for (int i = 0; i < nx; ++i)
-        {
-            file << cont.pixels[j*nx + i].r << " " << cont.pixels[j*nx + i].g << " " << cont.pixels[j*nx + i].b << "\n";
-        }
-    }
+   //for (int j =  ny - 1; j >= 0 ; j--)
+   // {
+  //      for (int i = 0; i < nx; ++i)
+  //      {
+  //          file << cont.pixels[j*nx + i].r << " " << cont.pixels[j*nx + i].g << " " << cont.pixels[j*nx + i].b << "\n";
+  //      }
+  //  }
 
 
-   /* for (int j = ny -1; j >= 0 ; j--)
+    for (int j = ny -1; j >= 0 ; j--)
     {
         for (int i = 0; i < nx; ++i)
         {
@@ -200,9 +233,9 @@ int main(int argCount, char* argVector[]) {
             int ir = int(255.99*col[0]);
             int ig = int(255.99*col[1]);
             int ib = int(255.99*col[2]);
-            //file << ir << " " << ig << " " << ib << "\n";
+            file << ir << " " << ig << " " << ib << "\n";
         }
-    }*/
+    }
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;
