@@ -51,7 +51,7 @@ hitable* random_scene(int spheres)
 hitable* generateScene()
 {
     int spheres = 100;
-    hitable **list = new hitable*[101];
+    hitable **list = new hitable*[103];
     hitable ** sphereList = new hitable*[spheres];
     hitable ** sphereList2 = new hitable*[spheres];
     int b = 0;
@@ -64,18 +64,11 @@ hitable* generateScene()
         }
     }
 
-    //sphereList[b++] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
     list[0] = new bvhNode(sphereList, b, 0, 1);
-    int a = 1;
-    for (int i = 0; i < 10; ++i)
-    {
-        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
+    list[1] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
 
-       // list[a++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
 
-    }
-
-    return new hitableList(list, 1);
+    return new hitableList(list, 2);
 }
 
 Vector4D color(const ray& r, hitable *world, int depth)
@@ -159,9 +152,9 @@ int main(int argCount, char* argVector[]) {
 
     auto start = std::chrono::system_clock::now();
     int nx, ny, ns, sp;
-    nx = 200;
-    ny = 100;
-    ns = 10;
+    nx = 400;
+    ny = 200;
+    ns = 50;
     sp = 10;
     std::ofstream file;
     file.open("image.ppm");

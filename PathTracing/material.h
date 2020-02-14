@@ -7,11 +7,11 @@ uint64_t s[2] = {0,1};
 
 float xorShift(void)
 {
-    static uint x = 123456789;
-    static uint y = 362436069;
-    static uint z = 521288629;
-    static uint w = 88675123;
-    uint t;
+    static unsigned int x = 123456789;
+    static unsigned int y = 362436069;
+    static unsigned int z = 521288629;
+    static unsigned int w = 88675123;
+    unsigned int t;
     t = x ^ (x << 11);
     x = y;
     y = z;
