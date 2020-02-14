@@ -12,6 +12,8 @@
 #include <vector>
 #include "node.h"
 #include "texture.h"
+#include "rect.h"
+#include "diffuseLight.h"
 
 
 
@@ -70,9 +72,10 @@ hitable* generateScene()
 
     list[0] = new bvhNode(sphereList, b, 0, 1);
     list[1] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(checker));
+    list[2] = new xyRect(3, 5, 1, 3, -2, new diffuseLight(new constantTexture(Vector4D(4, 4, 4, 1))));
 
 
-    return new hitableList(list, 2);
+    return new hitableList(list, 3);
 }
 
 Vector4D color(const ray& r, hitable *world, int depth)
@@ -82,13 +85,14 @@ Vector4D color(const ray& r, hitable *world, int depth)
     {
         ray scattered;
         Vector4D attenuation;
-        Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p)
+        Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p);
         if(depth < 50 && rec.matPtr->scatter(r, rec, attenuation, scattered))
         {
-            return color(scattered, world, depth + 1)*attenuation;
+            //return color(scattered, world, depth + 1)*attenuation;
+            return emitted + attenuation*color(scattered, world, depth + 1);
         }else
         {
-            return Vector4D(0,0,0,1);
+            return emitted;
         }
     }else
     {

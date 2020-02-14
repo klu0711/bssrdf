@@ -57,7 +57,7 @@ class material
 public:
     virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& attenuation, ray& scattered) const = 0;
     Vector4D reflect(const Vector4D& v, const Vector4D& n) const {return v - n*v.dotProduct(n)*2;}
-    virtual Vector4D emitted(float u,  float v, const, Vector4D& p) const { return Vector4D(0,0,0,1);}
+    virtual Vector4D emitted(float u,  float v, const Vector4D& p) const { return Vector4D(0,0,0,1);}
 };
 
 class lambertian : public material

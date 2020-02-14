@@ -9,8 +9,8 @@ class diffuseLight : public material
 {
 public:
     diffuseLight(texture* a) : emit(a){}
-    virtual bool scatter(const ray& r_in, const hit& rec, Vector4D& attenuation, ray& scattered) {return false;}
-    virtual Vector4D emitted(float u, flaot v, const Vector4D& p) const {return emit->value(u, v, p);}
+    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& attenuation, ray& scattered) const {return false;}
+    virtual Vector4D emitted(float u, float v, const Vector4D& p) const {return emit->value(u, v, p);}
 
     texture* emit;
 };
