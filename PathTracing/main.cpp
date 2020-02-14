@@ -11,10 +11,11 @@
 #include <thread>
 #include <vector>
 #include "node.h"
+#include "texture.h"
 
 
 
-hitable* random_scene(int spheres)
+/*hitable* random_scene(int spheres)
 {
     hitable **list = new hitable*[spheres+4];
     list[0] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
@@ -47,7 +48,7 @@ hitable* random_scene(int spheres)
     list[i++] = new sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
     return new hitableList(list, i);
 }
-
+*/
 hitable* generateScene()
 {
     int spheres = 100;
@@ -55,17 +56,20 @@ hitable* generateScene()
     hitable ** sphereList = new hitable*[spheres];
     hitable ** sphereList2 = new hitable*[spheres];
     int b = 0;
+
+    texture* checker = new checker_texture(new constantTexture(Vector4D(0.2, 0.3, 0.1, 1)), new constantTexture(Vector4D(0.9, 0.9, 0.9, 1)));
+
     for (int i = 0; i < spheres; ++i)
     {
         Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
         if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
         {
-            sphereList[b++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
+            sphereList[b++] = new sphere(center, 0.2, new lambertian(new constantTexture(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1))));
         }
     }
 
     list[0] = new bvhNode(sphereList, b, 0, 1);
-    list[1] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
+    list[1] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(checker));
 
 
     return new hitableList(list, 2);
@@ -78,6 +82,7 @@ Vector4D color(const ray& r, hitable *world, int depth)
     {
         ray scattered;
         Vector4D attenuation;
+        Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p)
         if(depth < 50 && rec.matPtr->scatter(r, rec, attenuation, scattered))
         {
             return color(scattered, world, depth + 1)*attenuation;
@@ -164,7 +169,7 @@ int main(int argCount, char* argVector[]) {
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
 
-    hitable *world1 = random_scene(sp);
+    //hitable *world1 = random_scene(sp);
     hitable *world = generateScene();
     float R = cos(M_PI/4);
     Vector4D lookfrom(13, 2, 3, 1);

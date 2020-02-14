@@ -8,6 +8,8 @@ struct hitRecord
 {
     float t;
     Vector4D p;
+    float u;
+    float v;
     Vector4D normal;
     material *matPtr;
 };

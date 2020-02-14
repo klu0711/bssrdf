@@ -43,7 +43,7 @@ int boxZCompare(const void * a, const void * b)
     else
         return 1;
 }
-
+//Bounding volume hierarchies node
 class bvhNode :  public hitable
 {
 public:
@@ -55,7 +55,7 @@ public:
     hitable *right;
     aabb box;
 };
-
+//Builds the hierarchy with a list of hitable objects
 bvhNode::bvhNode(hitable **l, int n, float time0, float time1)
 {
     int axis = int(3*drand48());
@@ -88,7 +88,7 @@ bool bvhNode::boundingBox(float t0, float t1, aabb &b) const
     b = box;
     return true;
 }
-
+//Loops through the entire hierarchy of objects and calls their hit functions
 bool bvhNode::hit(const ray &r, float tmin, float tmax, hitRecord &rec) const
 {
     if(box.hit(r, tmin, tmax))
