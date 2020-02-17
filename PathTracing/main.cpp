@@ -96,9 +96,8 @@ Vector4D color(const ray& r, hitable *world, int depth)
         }
     }else
     {
-        Vector4D unitDirection = r.direction().normalize();
-        float t = 0.5*(unitDirection[1] + 1.0);
-        return Vector4D(1.0,1.0,1.0,1)*(1.0-t) + Vector4D(0.5,0.7,1.0,1)*t;
+        return Vector4D(0, 0, 0, 1);
+
     }
 }
 struct pixel
@@ -163,7 +162,7 @@ int main(int argCount, char* argVector[]) {
     int nx, ny, ns, sp;
     nx = 400;
     ny = 200;
-    ns = 50;
+    ns = 500;
     sp = 10;
     std::ofstream file;
     file.open("image.ppm");
