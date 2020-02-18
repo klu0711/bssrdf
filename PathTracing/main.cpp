@@ -14,6 +14,7 @@
 #include "texture.h"
 #include "rect.h"
 #include "diffuseLight.h"
+#include "box.h"
 
 
 
@@ -59,6 +60,9 @@ hitable* cornellBox()
     list[i++] = new flipNormal(new xzRect(0, 555, 0, 555, 555, white));
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
+    list[i++] = new box(Vector4D(130, 0, 65, 1), Vector4D(295, 165, 230, 1), white);
+    list[i++] = new box(Vector4D(265, 0, 295, 1), Vector4D(430, 330, 460, 1), white);
+
     return new hitableList(list, i);
 }
 
