@@ -17,40 +17,7 @@
 
 
 
-/*hitable* random_scene(int spheres)
-{
-    hitable **list = new hitable*[spheres+4];
-    list[0] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(Vector4D(0.5, 0.5, 0.5, 1)));
-    int i = 1;
 
-    for (int b = 0; b < spheres; ++b)
-    {
-        float chooseMat = xorShift();
-        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
-        if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
-        {
-            if(chooseMat < 0.8) //Diffuse
-            {
-                //list[i++] = new sphere(center, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
-                list[i++] = new movingSphere(center, center + Vector4D(0, 0.5*xorShift(), 0, 1), 0.0, 1.0, 0.2, new lambertian(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1)));
-
-            }else if(chooseMat < 0.95) // metal
-            {
-                list[i++] = new sphere(center, 0.2,
-                        new metal(Vector4D(0.5*(1+xorShift()), 0.5*(1+xorShift()), 0.5*(1 + xorShift()), 1), 0.5*xorShift()));
-            }else
-            {
-                list[i++] = new sphere(center, 0.2, new dielectric(1.5));
-            }
-        }
-
-    }
-    list[i++] = new sphere(Vector4D(0, 1, 0, 1), 1.0, new dielectric(1.5));
-    list[i++] = new sphere(Vector4D(-4, 1, 0, 1), 1.0, new lambertian(Vector4D(0.4, 0.2, 0.1, 1)));
-    list[i++] = new sphere(Vector4D(4, 1, 0, 1), 1.0, new metal(Vector4D(0.7, 0.6, 0.5, 1), 0.0));
-    return new hitableList(list, i);
-}
-*/
 hitable* generateScene()
 {
     int spheres = 100;
@@ -78,6 +45,23 @@ hitable* generateScene()
     return new hitableList(list, 3);
 }
 
+hitable* cornellBox()
+{
+    hitable** list = new hitable*[6];
+    int i = 0;
+    material* red = new lambertian(new constantTexture(Vector4D(0.65, 0.05, 0.05, 1)));
+    material* white = new lambertian(new constantTexture(Vector4D(0.73, 0.73, 0.73, 1)));
+    material* green = new lambertian(new constantTexture(Vector4D(0.12, 0.45, 0.15, 1)));
+    material* light = new diffuseLight(new constantTexture(Vector4D(15, 15, 15, 1)));
+    list[i++] = new flipNormal(new yzRect(0, 555, 0, 555, 555, green));
+    list[i++] = new yzRect(0, 555, 0, 555, 0, red);
+    list[i++] = new xzRect(213, 343, 227, 332, 554, light);
+    list[i++] = new flipNormal(new xzRect(0, 555, 0, 555, 555, white));
+    list[i++] = new xzRect(0, 555, 0, 555, 0, white);
+    list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
+    return new hitableList(list, i);
+}
+
 Vector4D color(const ray& r, hitable *world, int depth)
 {
     hitRecord rec;
@@ -85,10 +69,13 @@ Vector4D color(const ray& r, hitable *world, int depth)
     {
         ray scattered;
         Vector4D attenuation;
+        //Only lights emit light
         Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p);
+        //Scatter returns false when it hits a light
         if(depth < 50 && rec.matPtr->scatter(r, rec, attenuation, scattered))
         {
             //return color(scattered, world, depth + 1)*attenuation;
+            //Emitted is added to simulate the light from a specific source, if the ray hit a light
             return emitted + attenuation*color(scattered, world, depth + 1);
         }else
         {
@@ -161,8 +148,8 @@ int main(int argCount, char* argVector[]) {
     auto start = std::chrono::system_clock::now();
     int nx, ny, ns, sp;
     nx = 400;
-    ny = 200;
-    ns = 500;
+    ny = 400;
+    ns = 200;
     sp = 10;
     std::ofstream file;
     file.open("image.ppm");
@@ -173,13 +160,18 @@ int main(int argCount, char* argVector[]) {
     Vector4D origin(0.0,0.0,0.0,1);
 
     //hitable *world1 = random_scene(sp);
-    hitable *world = generateScene();
+    hitable *world = cornellBox();
     float R = cos(M_PI/4);
-    Vector4D lookfrom(13, 2, 3, 1);
-    Vector4D lookat(0, 0, 0, 1);
+    //Vector4D lookfrom(13, 2, 3, 1);
+    //Vector4D lookat(0, 0, 0, 1);
+    //float distToFocus = 10;
+    //float aperature = 0.1;
+    Vector4D lookfrom(278, 278, -800, 1);
+    Vector4D lookat(278, 278, 0, 1);
     float distToFocus = 10;
-    float aperature = 0.1;
-    camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 20, float(nx)/ny, aperature, distToFocus, 0.0f, 1.0f);
+    float aperature = 0;
+
+    camera cam(lookfrom, lookat, Vector4D(0, 1, 0, 1), 40, float(nx)/ny, aperature, distToFocus, 0.0f, 1.0f);
 
     cont.pixels.resize(ny*nx);
     cont.numPixels = nx*ny;
