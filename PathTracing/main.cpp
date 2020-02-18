@@ -15,6 +15,7 @@
 #include "rect.h"
 #include "diffuseLight.h"
 #include "box.h"
+#include "translate.h"
 
 
 
@@ -60,8 +61,8 @@ hitable* cornellBox()
     list[i++] = new flipNormal(new xzRect(0, 555, 0, 555, 555, white));
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
-    list[i++] = new box(Vector4D(130, 0, 65, 1), Vector4D(295, 165, 230, 1), white);
-    list[i++] = new box(Vector4D(265, 0, 295, 1), Vector4D(430, 330, 460, 1), white);
+    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
+    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, 0, 295, 1));
 
     return new hitableList(list, i);
 }
