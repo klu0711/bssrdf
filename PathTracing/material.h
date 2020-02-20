@@ -55,7 +55,8 @@ float schlick(float cosine, float refIdx)
 class material
 {
 public:
-    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& attenuation, ray& scattered) const = 0;
+    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& albedo, ray& scattered, float&pdf) const { return false;}
+    virtual float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const {return false;}
     Vector4D reflect(const Vector4D& v, const Vector4D& n) const {return v - n*v.dotProduct(n)*2;}
     virtual Vector4D emitted(float u,  float v, const Vector4D& p) const { return Vector4D(0,0,0,1);}
 };
@@ -64,10 +65,29 @@ class lambertian : public material
 {
 public:
     lambertian(texture* a): albedo(a) {}
-    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& attenuation, ray& scattered) const {
-        Vector4D target = rec.p + rec.normal + randomInUnitSphere();
-        scattered = ray(rec.p, target - rec.p, r_in.time());
-        attenuation = albedo->value(0,0,rec.p);
+
+    float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const
+    {
+        float cosine = rec.normal.dotProduct((scattered.direction()).normalize());
+        if(cosine < 0) cosine = 0;
+        float a = M_PI;
+        return cosine / M_PI;
+    }
+
+    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& alb, ray& scattered, float& pdf) const
+    {
+        //Vector4D target = rec.p + rec.normal + randomInUnitSphere();
+        //scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
+        //alb = albedo->value(rec.u, rec.v, rec.p);
+        //pdf = rec.normal.dotProduct(scattered.direction()) / float(M_PI);
+        //return true;
+        Vector4D direction;
+        do{
+            direction = randomInUnitSphere();
+        }while (direction.dotProduct(rec.normal) < 0);
+        scattered = ray(rec.p, direction.normalize(), r_in.time());
+        alb = albedo->value(rec.u, rec.v, rec.p);
+        pdf = 0.5f / M_PI;
         return true;
     }
     texture* albedo;

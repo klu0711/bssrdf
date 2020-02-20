@@ -16,6 +16,7 @@
 #include "diffuseLight.h"
 #include "box.h"
 #include "translate.h"
+#include <iostream>
 
 
 
@@ -76,12 +77,19 @@ Vector4D color(const ray& r, hitable *world, int depth)
         Vector4D attenuation;
         //Only lights emit light
         Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p);
+        float pdf;
+        Vector4D albedo;
         //Scatter returns false when it hits a light
-        if(depth < 50 && rec.matPtr->scatter(r, rec, attenuation, scattered))
+        if(depth < 50 && rec.matPtr->scatter(r, rec, albedo, scattered, pdf))
         {
-            //return color(scattered, world, depth + 1)*attenuation;
             //Emitted is added to simulate the light from a specific source, if the ray hit a light
-            return emitted + attenuation*color(scattered, world, depth + 1);
+            //return emitted + albedo*color(scattered, world, depth + 1);
+            Vector4D a = albedo*rec.matPtr->scatterPdf(r, rec, scattered);
+            Vector4D b = emitted + a * color(scattered, world, depth + 1);
+            Vector4D c = b / pdf;
+            //if(pdf <= 0)
+                //std::cerr << "AAAAA" << std::endl;
+            return c;
         }else
         {
             return emitted;
