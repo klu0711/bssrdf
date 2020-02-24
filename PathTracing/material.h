@@ -3,8 +3,11 @@
 #include "ray.h"
 #include "hitable.h"
 #include "texture.h"
+#include "onb.h"
 
 uint64_t s[2] = {0,1};
+
+const float RPI = 3.141592;
 
 float xorShift(void)
 {
@@ -21,6 +24,18 @@ float xorShift(void)
 
     return static_cast<float>(w) / static_cast<float>(0xffffffff);
 }
+
+Vector4D randomCosineDir()
+{
+    float r1 = drand48();
+    float r2 = drand48();
+    float z = sqrt(1-r2);
+    float phi = 2*M_PI*r1;
+    float x = cos(phi)*2*sqrt(r2);
+    float y = sin(phi)*2*sqrt(r2);
+    return Vector4D(x, y, z, 1);
+}
+
 Vector4D randomInUnitSphere()
 {
     Vector4D p;
@@ -68,27 +83,28 @@ public:
 
     float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const
     {
-        float cosine = rec.normal.dotProduct((scattered.direction()).normalize());
-        if(cosine < 0) cosine = 0;
-        float a = M_PI;
-        return cosine / M_PI;
+        Vector4D temp = scattered.direction().normalize();
+        float cosine = rec.normal.dotProduct(temp);
+        if(cosine < 0)
+            cosine = 0;
+        float a = RPI;
+        return cosine / RPI;
     }
 
-    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& alb, ray& scattered, float& pdf) const
+    bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& alb, ray& scattered, float& pdf) const
     {
-        //Vector4D target = rec.p + rec.normal + randomInUnitSphere();
-        //scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
-        //alb = albedo->value(rec.u, rec.v, rec.p);
-        //pdf = rec.normal.dotProduct(scattered.direction()) / float(M_PI);
-        //return true;
-        Vector4D direction;
-        do{
-            direction = randomInUnitSphere();
-        }while (direction.dotProduct(rec.normal) < 0);
-        scattered = ray(rec.p, direction.normalize(), r_in.time());
+        Vector4D target = rec.p + rec.normal + randomInUnitSphere();
+        scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
         alb = albedo->value(rec.u, rec.v, rec.p);
-        pdf = 0.5f / M_PI;
+        pdf = rec.normal.dotProduct(scattered.direction()) / RPI;
         return true;
+        //onb uvw;
+        //uvw.buildFromW(rec.normal);
+        //Vector4D dir = uvw.local(randomCosineDir());
+        //scattered = ray(rec.p, dir.normalize(), r_in.time());
+        //alb = albedo->value(rec.u, rec.v, rec.p);
+        //pdf = (uvw.w().dotProduct(scattered.direction())) / RPI;
+        //return true;
     }
     texture* albedo;
 };

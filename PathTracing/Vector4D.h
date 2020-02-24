@@ -72,7 +72,7 @@
 	}
 	inline Vector4D Vector4D::operator/(const float &rhs) const
 	{
-        return Vector4D(vector[0]/rhs, vector[1]/rhs, vector[2]/rhs, 1);
+        return Vector4D(this->vector[0]/rhs, this->vector[1]/rhs, this->vector[2]/rhs, 1);
 	}
 	inline void Vector4D::operator=(const Vector4D &rhs)
 	{
@@ -99,13 +99,14 @@
 	/// Returns a float of the dot product of the vectors
 	inline float Vector4D::dotProduct(const Vector4D& vec) const
 	{
-		return ((vector[0] * vec.vector[0]) + (vector[1] * vec.vector[1]) + (vector[2] * vec.vector[2]));
+		return ((this->vector[0] * vec.vector[0]) + (this->vector[1] * vec.vector[1]) + (this->vector[2] * vec.vector[2]));
 	}
 	/// Returns a new vector with the cross product of the vectors
 	inline Vector4D Vector4D::crossProduct(const Vector4D& vec) const
 	{
-		return(Vector4D((vector[1]*vec[2])-(vector[2]*vec[1]), (vector[2]*vec[0])-(vector[0]*vec[2]),
-						(vector[0]*vec[1])-(vector[1]*vec[0]),1));
+		return(Vector4D((this->vector[1]*vec[2])-(this->vector[2]*vec[1]),
+		                (this->vector[2]*vec[0])-(this->vector[0]*vec[2]),
+						(this->vector[0]*vec[1])-(this->vector[1]*vec[0]),1));
 	}
 	inline float Vector4D::getVectorValue(int index)
 	{

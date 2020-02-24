@@ -58,7 +58,7 @@ public:
     {
         if(ptr->hit(r, t0, t1, rec))
         {
-            rec.normal =  rec.normal * -1;
+            rec.normal =  rec.normal * -1.f;
             return true;
         } else
             return false;

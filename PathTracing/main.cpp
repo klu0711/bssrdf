@@ -84,12 +84,11 @@ Vector4D color(const ray& r, hitable *world, int depth)
         {
             //Emitted is added to simulate the light from a specific source, if the ray hit a light
             //return emitted + albedo*color(scattered, world, depth + 1);
-            Vector4D a = albedo*rec.matPtr->scatterPdf(r, rec, scattered);
-            Vector4D b = emitted + a * color(scattered, world, depth + 1);
-            Vector4D c = b / pdf;
-            //if(pdf <= 0)
-                //std::cerr << "AAAAA" << std::endl;
-            return c;
+            //Vector4D a = albedo*rec.matPtr->scatterPdf(r, rec, scattered);
+            //Vector4D b = emitted + a * color(scattered, world, depth + 1);
+            //Vector4D c = b / pdf;
+            return emitted + albedo * color(scattered, world, depth + 1);
+            //return b ;
         }else
         {
             return emitted;
@@ -162,11 +161,9 @@ int main(int argCount, char* argVector[]) {
     int nx, ny, ns, sp;
     nx = 400;
     ny = 400;
-    ns = 200;
+    ns = 100;
     sp = 10;
-    std::ofstream file;
-    file.open("image.ppm");
-    file << "P3\n" << nx << " " << ny << "\n255\n";
+
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
     Vector4D vertical(0.0,2.0,0.0,1);
@@ -199,7 +196,7 @@ int main(int argCount, char* argVector[]) {
 
         }
     }
-    int numThreads = 12;
+    int numThreads = 8;
     std::thread threads[numThreads];
     for (int m = 0; m < numThreads; ++m)
     {
@@ -210,7 +207,9 @@ int main(int argCount, char* argVector[]) {
         threads[j].join();
     }
 
-
+    std::ofstream file;
+    file.open("image.ppm");
+    file << "P3\n" << nx << " " << ny << "\n255\n";
    for (int j =  ny - 1; j >= 0 ; j--)
    {
         for (int i = 0; i < nx; ++i)
@@ -220,28 +219,6 @@ int main(int argCount, char* argVector[]) {
     }
 
 
-   /* for (int j = ny -1; j >= 0 ; j--)
-    {
-        for (int i = 0; i < nx; ++i)
-        {
-            Vector4D col(0,0,0,1);
-            for (int k = 0; k < ns; ++k)
-            {
-                float u = float(i + xorShift())/float(nx);
-                float v = float(j + xorShift())/float(ny);
-                ray r = cam.getRay(u, v);
-                numRays++;
-                Vector4D p = r.pointAtParameter(2.0);
-                col = col + color(r, world, 0);
-            }
-            col = col / float(ns);
-            col = Vector4D(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]), 1);
-            int ir = int(255.99*col[0]);
-            int ig = int(255.99*col[1]);
-            int ib = int(255.99*col[2]);
-            file << ir << " " << ig << " " << ib << "\n";
-        }
-    }*/
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(end - start);
     std::cout << "Rays: " << (float)numRays/(float)1000000 << " M" << std::endl << "Elapsed time: " << elapsed.count() << " Seconds" << std::endl;

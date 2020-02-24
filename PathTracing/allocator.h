@@ -10,12 +10,12 @@ public:
     unsigned int offset;
     void init(unsigned int sizeInBytes)
     {
-        this->memory = (char*)malloc(sizeInBytes);
+       // this->memory = (char*)malloc(sizeInBytes);
     }
 
     void* allocate(unsigned int sizeOfObject)
     {
-        return memory += offset;
+       // return memory += offset;
     }
 private:
 
