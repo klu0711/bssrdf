@@ -93,18 +93,18 @@ public:
 
     bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& alb, ray& scattered, float& pdf) const
     {
-        Vector4D target = rec.p + rec.normal + randomInUnitSphere();
-        scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
-        alb = albedo->value(rec.u, rec.v, rec.p);
-        pdf = rec.normal.dotProduct(scattered.direction()) / RPI;
-        return true;
-        //onb uvw;
-        //uvw.buildFromW(rec.normal);
-        //Vector4D dir = uvw.local(randomCosineDir());
-        //scattered = ray(rec.p, dir.normalize(), r_in.time());
+        //Vector4D target = rec.p + rec.normal + randomInUnitSphere();
+        //scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
         //alb = albedo->value(rec.u, rec.v, rec.p);
-        //pdf = (uvw.w().dotProduct(scattered.direction())) / RPI;
+        //pdf = rec.normal.dotProduct(scattered.direction()) / RPI;
         //return true;
+        onb uvw;
+        uvw.buildFromW(rec.normal);
+        Vector4D dir = uvw.local(randomCosineDir());
+        scattered = ray(rec.p, dir.normalize(), r_in.time());
+        alb = albedo->value(rec.u, rec.v, rec.p);
+        pdf = (uvw.w().dotProduct(scattered.direction())) / RPI;
+        return true;
     }
     texture* albedo;
 };

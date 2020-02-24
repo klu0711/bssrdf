@@ -63,7 +63,7 @@ hitable* cornellBox()
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
     list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
-    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, 0, 295, 1));
+    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, -150, 295, 1));
 
     return new hitableList(list, i);
 }
@@ -87,7 +87,19 @@ Vector4D color(const ray& r, hitable *world, int depth)
             //Vector4D a = albedo*rec.matPtr->scatterPdf(r, rec, scattered);
             //Vector4D b = emitted + a * color(scattered, world, depth + 1);
             //Vector4D c = b / pdf;
-            return emitted + albedo * color(scattered, world, depth + 1);
+            Vector4D onLight = Vector4D(213 + drand48()*(343-213), 554, 227 + drand48()*(332-227), 1);
+            Vector4D toLight = onLight - rec.p;
+            float distanceSquared = toLight.squaredLength();
+            toLight = toLight.normalize();
+            if(toLight.dotProduct(rec.normal) < 0)
+                return emitted;
+            float lightArea = (343-213)*(332-227);
+            float lightCosine = fabs(toLight[1]);
+            if(lightCosine < 0.000001)
+                return emitted;
+            pdf = distanceSquared / (lightCosine * lightArea);
+            scattered = ray(rec.p, toLight, r.time());
+            return emitted + albedo*rec.matPtr->scatterPdf(r, rec, scattered) * color(scattered, world, depth + 1) / pdf;
             //return b ;
         }else
         {
