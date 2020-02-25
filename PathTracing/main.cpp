@@ -17,6 +17,7 @@
 #include "box.h"
 #include "translate.h"
 #include <iostream>
+#include "pdf.h"
 
 
 
@@ -58,7 +59,7 @@ hitable* cornellBox()
     material* light = new diffuseLight(new constantTexture(Vector4D(15, 15, 15, 1)));
     list[i++] = new flipNormal(new yzRect(0, 555, 0, 555, 555, green));
     list[i++] = new yzRect(0, 555, 0, 555, 0, red);
-    list[i++] = new xzRect(213, 343, 227, 332, 554, light);
+    list[i++] = new flipNormal(new xzRect(213, 343, 227, 332, 554, light));
     list[i++] = new flipNormal(new xzRect(0, 555, 0, 555, 555, white));
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
@@ -76,35 +77,18 @@ Vector4D color(const ray& r, hitable *world, int depth)
         ray scattered;
         Vector4D attenuation;
         //Only lights emit light
-        Vector4D emitted = rec.matPtr->emitted(rec.u, rec.v, rec.p);
+        Vector4D emitted = rec.matPtr->emitted(r, rec, rec.u, rec.v, rec.p);
         float pdf;
         Vector4D albedo;
         //Scatter returns false when it hits a light
         if(depth < 50 && rec.matPtr->scatter(r, rec, albedo, scattered, pdf))
         {
-            //Emitted is added to simulate the light from a specific source, if the ray hit a light
-            //return emitted + albedo*color(scattered, world, depth + 1);
-            //Vector4D a = albedo*rec.matPtr->scatterPdf(r, rec, scattered);
-            //Vector4D b = emitted + a * color(scattered, world, depth + 1);
-            //Vector4D c = b / pdf;
-            Vector4D onLight = Vector4D(213 + drand48()*(343-213), 554, 227 + drand48()*(332-227), 1);
-            Vector4D toLight = onLight - rec.p;
-            float distanceSquared = toLight.squaredLength();
-            toLight = toLight.normalize();
-            if(toLight.dotProduct(rec.normal) < 0)
-            {
-                return emitted;
-            }
-            float lightArea = (343-213)*(332-227);
-            float lightCosine = fabs(toLight[1]) ;
-
-            if(lightCosine < 0.000001)
-            {
-                return emitted;
-            }
-
-            pdf = distanceSquared / (lightCosine * lightArea);
-            scattered = ray(rec.p, toLight, r.time());
+            hitable* lightShape = new xzRect(213, 343, 227, 332, 554, 0);
+            hitablePdf p0(lightShape, rec.p);
+            cosinePdf p1(rec.normal);
+            mixturePdf p(&p0, &p1);
+            scattered = ray(rec.p, p.generate(), r.time());
+            pdf = p.value(scattered.direction());
             return emitted + albedo*rec.matPtr->scatterPdf(r, rec, scattered) * color(scattered, world, depth + 1) / pdf;
             //return b ;
         }else
@@ -194,7 +178,7 @@ int main(int argCount, char* argVector[]) {
     //Vector4D lookat(0, 0, 0, 1);
     //float distToFocus = 10;
     //float aperature = 0.1;
-    Vector4D lookfrom(278, 278, -600, 1);
+    Vector4D lookfrom(278, 278, -700, 1);
     Vector4D lookat(278, 278, 0, 1);
     float distToFocus = 10;
     float aperature = 0;
@@ -214,7 +198,7 @@ int main(int argCount, char* argVector[]) {
 
         }
     }
-    int numThreads = 12;
+    int numThreads = 8;
     std::thread threads[numThreads];
     for (int m = 0; m < numThreads; ++m)
     {

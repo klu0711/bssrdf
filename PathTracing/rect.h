@@ -1,6 +1,7 @@
 #ifndef S0008E_RECT_H
 #define S0008E_RECT_H
 
+#include <iostream>
 #include "material.h"
 #include "hitable.h"
 #include "aabb.h"
@@ -30,6 +31,23 @@ public:
     {
         box = aabb(Vector4D(x0, k-0.0001, z0  , 1),Vector4D(x1,k+0.0001, z1, 1));
         return true;
+    }
+    virtual float pdfValue(const Vector4D& o, const Vector4D& v) const
+    {
+        hitRecord rec;
+        if(this->hit(ray(o, v), 0.001, MAXFLOAT, rec))
+        {
+            float area = (x1-x0)*(z1-z0);
+            float distanceSquared = rec.t * rec.t * v.squaredLength();
+            float cosine = fabs(v.dotProduct(rec.normal) / v.length());
+            return distanceSquared / (cosine * area);
+        }
+        else return 0;
+    }
+    virtual Vector4D random(const Vector4D& o) const
+    {
+        Vector4D randomPoint = Vector4D(x0 + drand48(), k, z0 + drand48()*(z1-z0), 0);
+        return randomPoint - o;
     }
     material* mp;
     float x0, x1, z0, z1, k;
