@@ -104,9 +104,10 @@ bool rotateY::hit(const ray &r, float tmin, float tmax, hitRecord &rec) const
         p[0] = cosTheta*rec.p[0] + sinTheta*rec.p[2];
         p[2] = -sinTheta*rec.p[0] + cosTheta*rec.p[2];
         norm[0] = cosTheta*rec.normal[0] + sinTheta*rec.normal[2];
-        norm[1] = -sinTheta*rec.normal[0] + cosTheta*rec.normal[2];
+        norm[2] = -sinTheta*rec.normal[0] + cosTheta*rec.normal[2];
         rec.p = p;
-        rec.normal = norm;
+        rec.normal = norm.normalize();
+        assert(rec.normal.length() > 0.1f);
         return true;
     } else
         return false;

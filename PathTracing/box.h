@@ -25,12 +25,12 @@ box::box(const Vector4D &p0, const Vector4D &p1, material *ptr)
     pmin = p0;
     pmax = p1;
     hitable** list = new hitable*[6];
-    list[0] = new flipNormal(new xyRect(p0[0], p1[0], p0[1], p1[1], p1[2], ptr));
-    list[1] = new xyRect(p0[0], p1[0], p0[1], p1[1], p0[2], ptr);
-    list[2] = new flipNormal(new xzRect(p0[0], p1[0], p0[2], p1[2], p1[1], ptr));
-    list[3] = new xzRect(p0[0], p1[0], p0[2], p1[2], p0[1], ptr);
-    list[4] = new flipNormal(new yzRect(p0[1], p1[1], p0[2], p1[2], p1[0], ptr));
-    list[5] = new yzRect(p0[1], p1[1], p0[2], p1[2], p0[0], ptr);
+    list[0] = new xyRect(p0[0], p1[0], p0[1], p1[1], p1[2], ptr);
+    list[1] = new flipNormal(new xyRect(p0[0], p1[0], p0[1], p1[1], p0[2], ptr));
+    list[2] = new xzRect(p0[0], p1[0], p0[2], p1[2], p1[1], ptr);
+    list[3] = new flipNormal(new xzRect(p0[0], p1[0], p0[2], p1[2], p0[1], ptr));
+    list[4] = new yzRect(p0[1], p1[1], p0[2], p1[2], p1[0], ptr);
+    list[5] = new flipNormal(new yzRect(p0[1], p1[1], p0[2], p1[2], p0[0], ptr));
     listPtr = new hitableList(list, 6);
 
 }

@@ -54,7 +54,7 @@
 	/// Operator overload for the product of a vector and a scalar
 	inline Vector4D Vector4D::operator*(const float& rhs) const
 	{
-		return Vector4D(vector[0] * rhs, vector[1] * rhs, vector[2] * rhs,1);
+		return Vector4D(vector[0] * rhs, vector[1] * rhs, vector[2] * rhs, 1);
 	}
 	inline Vector4D Vector4D::operator*(const Vector4D& rhs) const
 	{

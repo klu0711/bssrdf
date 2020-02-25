@@ -92,11 +92,17 @@ Vector4D color(const ray& r, hitable *world, int depth)
             float distanceSquared = toLight.squaredLength();
             toLight = toLight.normalize();
             if(toLight.dotProduct(rec.normal) < 0)
+            {
                 return emitted;
+            }
             float lightArea = (343-213)*(332-227);
-            float lightCosine = fabs(toLight[1]);
+            float lightCosine = fabs(toLight[1]) ;
+
             if(lightCosine < 0.000001)
+            {
                 return emitted;
+            }
+
             pdf = distanceSquared / (lightCosine * lightArea);
             scattered = ray(rec.p, toLight, r.time());
             return emitted + albedo*rec.matPtr->scatterPdf(r, rec, scattered) * color(scattered, world, depth + 1) / pdf;
@@ -188,7 +194,7 @@ int main(int argCount, char* argVector[]) {
     //Vector4D lookat(0, 0, 0, 1);
     //float distToFocus = 10;
     //float aperature = 0.1;
-    Vector4D lookfrom(278, 278, -800, 1);
+    Vector4D lookfrom(278, 278, -600, 1);
     Vector4D lookat(278, 278, 0, 1);
     float distToFocus = 10;
     float aperature = 0;
@@ -208,7 +214,7 @@ int main(int argCount, char* argVector[]) {
 
         }
     }
-    int numThreads = 8;
+    int numThreads = 12;
     std::thread threads[numThreads];
     for (int m = 0; m < numThreads; ++m)
     {

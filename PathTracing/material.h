@@ -81,13 +81,13 @@ class lambertian : public material
 public:
     lambertian(texture* a): albedo(a) {}
 
-    float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const
+    float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const override
     {
         Vector4D temp = scattered.direction().normalize();
-        float cosine = rec.normal.dotProduct(temp);
+        auto n = rec.normal;
+        float cosine = n.dotProduct(temp);
         if(cosine < 0)
             cosine = 0;
-        float a = RPI;
         return cosine / RPI;
     }
 
