@@ -57,6 +57,7 @@ hitable* cornellBox()
     material* white = new lambertian(new constantTexture(Vector4D(0.73, 0.73, 0.73, 1)));
     material* green = new lambertian(new constantTexture(Vector4D(0.12, 0.45, 0.15, 1)));
     material* light = new diffuseLight(new constantTexture(Vector4D(15, 15, 15, 1)));
+    material* metalMat = new metal(Vector4D(0.8, 0.85, 0.88, 0), 0.0);
     list[i++] = new flipNormal(new yzRect(0, 555, 0, 555, 555, green));
     list[i++] = new yzRect(0, 555, 0, 555, 0, red);
     list[i++] = new flipNormal(new xzRect(213, 343, 227, 332, 554, light));
@@ -64,33 +65,33 @@ hitable* cornellBox()
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
     list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
-    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, -150, 295, 1));
+    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), metalMat), 15), Vector4D(265, 0, 295, 1));
 
     return new hitableList(list, i);
 }
 
-Vector4D color(const ray& r, hitable *world, int depth)
+Vector4D color(const ray& r, hitable *world, hitable* lightShape,  int depth)
 {
-    hitRecord rec;
-    if(world->hit(r, 0.001, MAXFLOAT, rec))
+    hitRecord hRec;
+    if(world->hit(r, 0.001, MAXFLOAT, hRec))
     {
-        ray scattered;
-        Vector4D attenuation;
+        scatterRecord sRec;
         //Only lights emit light
-        Vector4D emitted = rec.matPtr->emitted(r, rec, rec.u, rec.v, rec.p);
-        float pdf;
-        Vector4D albedo;
+        Vector4D emitted = hRec.matPtr->emitted(r, hRec, hRec.u, hRec.v, hRec.p);
         //Scatter returns false when it hits a light
-        if(depth < 50 && rec.matPtr->scatter(r, rec, albedo, scattered, pdf))
+        if(depth < 50 && hRec.matPtr->scatter(r, hRec, sRec))
         {
-            hitable* lightShape = new xzRect(213, 343, 227, 332, 554, 0);
-            hitablePdf p0(lightShape, rec.p);
-            cosinePdf p1(rec.normal);
-            mixturePdf p(&p0, &p1);
-            scattered = ray(rec.p, p.generate(), r.time());
-            pdf = p.value(scattered.direction());
-            return emitted + albedo*rec.matPtr->scatterPdf(r, rec, scattered) * color(scattered, world, depth + 1) / pdf;
-            //return b ;
+            if(sRec.isSpecular)
+            {
+                return sRec.attenuation * color(sRec.specularRay, world, lightShape, depth+1);
+            } else
+            {
+                hitablePdf pLight(lightShape, hRec.p);
+                mixturePdf p(&pLight, sRec.pdfPtr);
+                ray scattered = ray(hRec.p, p.generate(), r.time());
+                float pdfVal = p.value(scattered.direction());
+                return emitted + sRec.attenuation*hRec.matPtr->scatterPdf(r, hRec, scattered) * color(scattered, world, lightShape, depth + 1) / pdfVal;
+            }
         }else
         {
             return emitted;
@@ -132,6 +133,8 @@ pixelContainer cont;
 unsigned int numRays;
 void calcPixel(int ns, hitable * world, int nx, int ny, camera cam)
 {
+    hitable* lightShape = new xzRect(213, 343, 227, 332, 554, 0);
+
     while(1)
     {
         pixel* currentPixel = cont.getPixel();
@@ -144,7 +147,7 @@ void calcPixel(int ns, hitable * world, int nx, int ny, camera cam)
             float v = float(currentPixel->y + xorShift())/float(ny);
             ray r = cam.getRay(u, v);
             Vector4D p = r.pointAtParameter(2.0);
-            col = col + color(r, world, 0);
+            col = col + color(r, world, lightShape,0);
             numRays++;
 
         }

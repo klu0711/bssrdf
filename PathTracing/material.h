@@ -4,9 +4,7 @@
 #include "hitable.h"
 #include "texture.h"
 #include "onb.h"
-
-uint64_t s[2] = {0,1};
-
+#include "pdf.h"
 const float RPI = 3.141592;
 
 float xorShift(void)
@@ -67,10 +65,18 @@ float schlick(float cosine, float refIdx)
     return r0 + (1-r0)*pow((1-cosine), 5);
 }
 
+struct scatterRecord
+{
+    ray specularRay;
+    bool isSpecular;
+    Vector4D attenuation;
+    pdf* pdfPtr;
+};
+
 class material
 {
 public:
-    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& albedo, ray& scattered, float&pdf) const { return false;}
+    virtual bool scatter(const ray& r_in, const hitRecord& rec,scatterRecord& sRec) const { return false;}
     virtual float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const {return false;}
     Vector4D reflect(const Vector4D& v, const Vector4D& n) const {return v - n*v.dotProduct(n)*2;}
     virtual Vector4D emitted(const ray& r_in, const hitRecord& rec, float u,  float v, const Vector4D& p) const { return Vector4D(0,0,0,1);}
@@ -91,24 +97,16 @@ public:
         return cosine / RPI;
     }
 
-    bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& alb, ray& scattered, float& pdf) const
+    bool scatter(const ray& r_in, const hitRecord& rec, scatterRecord& sRec) const
     {
-        //Vector4D target = rec.p + rec.normal + randomInUnitSphere();
-        //scattered = ray(rec.p, (target-rec.p).normalize(), r_in.time());
-        //alb = albedo->value(rec.u, rec.v, rec.p);
-        //pdf = rec.normal.dotProduct(scattered.direction()) / RPI;
-        //return true;
-        onb uvw;
-        uvw.buildFromW(rec.normal);
-        Vector4D dir = uvw.local(randomCosineDir());
-        scattered = ray(rec.p, dir.normalize(), r_in.time());
-        alb = albedo->value(rec.u, rec.v, rec.p);
-        pdf = (uvw.w().dotProduct(scattered.direction())) / RPI;
+        sRec.isSpecular = false;
+        sRec.attenuation = albedo->value(rec.u, rec.v, rec.p);
+        sRec.pdfPtr = new cosinePdf(rec.normal);
         return true;
     }
     texture* albedo;
 };
-
+/*
 class dielectric : public material
 {
 public:
@@ -153,17 +151,20 @@ public:
 
     float refIdx;
 };
+*/
 
 class metal : public material
 {
 public:
     metal(const Vector4D& a, float f) : albedo(a) {f<1 ? fuzz = f : fuzz = 1;};
-    virtual bool scatter(const ray& r_in, const hitRecord& rec, Vector4D& attenuation, ray& scattered) const
+    virtual bool scatter(const ray& r_in, const hitRecord& hRec, scatterRecord& sRec) const
     {
-        Vector4D reflected = reflect(r_in.direction().normalize(), rec.normal);
-        scattered = ray(rec.p, reflected + randomInUnitSphere()*fuzz);
-        attenuation = albedo;
-        return (scattered.direction().dotProduct(rec.normal) > 0);
+        Vector4D reflected = reflect(r_in.direction().normalize(), hRec.normal);
+        sRec.specularRay = ray(hRec.p, reflected + randomInUnitSphere() * fuzz);
+        sRec.attenuation = albedo;
+        sRec.isSpecular = true;
+        sRec.pdfPtr = 0;
+        return true;
     }
     Vector4D albedo;
     float fuzz;

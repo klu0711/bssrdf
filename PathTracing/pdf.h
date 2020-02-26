@@ -3,7 +3,18 @@
 
 #include "Vector4D.h"
 #include "onb.h"
-#include "material.h"
+
+
+Vector4D randomCosDir()
+{
+    float r1 = drand48();
+    float r2 = drand48();
+    float z = sqrt(1-r2);
+    float phi = 2*M_PI*r1;
+    float x = cos(phi)*2*sqrt(r2);
+    float y = sin(phi)*2*sqrt(r2);
+    return Vector4D(x, y, z, 1);
+}
 class pdf
 {
 public:
@@ -21,7 +32,7 @@ public:
         float cosine = dir.normalize().dotProduct(uvw.w());
         if(cosine > 0)
         {
-            return cosine / RPI;
+            return cosine / M_PI;
         } else
         {
             return 0;
@@ -29,7 +40,7 @@ public:
     }
     virtual Vector4D generate() const
     {
-        return  uvw.local(randomCosineDir());
+        return  uvw.local(randomCosDir());
     }
 
     onb uvw;
