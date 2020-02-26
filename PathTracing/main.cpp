@@ -20,6 +20,14 @@
 #include "pdf.h"
 
 
+inline Vector4D deNan(const Vector4D& c)
+{
+    Vector4D temp = c;
+    if(!(temp[0] == temp[0])) temp[0] = 0;
+    if(!(temp[1] == temp[1])) temp[1] = 0;
+    if(!(temp[2] == temp[2])) temp[2] = 0;
+    return temp;
+}
 
 
 hitable* generateScene()
@@ -65,7 +73,7 @@ hitable* cornellBox()
     list[i++] = new xzRect(0, 555, 0, 555, 0, white);
     list[i++] = new flipNormal(new xyRect(0, 555, 0, 555, 555, white));
     list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
-    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), metalMat), 15), Vector4D(265, 0, 295, 1));
+    list[i++] = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, 0, 295, 1));
 
     return new hitableList(list, i);
 }
@@ -147,7 +155,7 @@ void calcPixel(int ns, hitable * world, int nx, int ny, camera cam)
             float v = float(currentPixel->y + xorShift())/float(ny);
             ray r = cam.getRay(u, v);
             Vector4D p = r.pointAtParameter(2.0);
-            col = col + color(r, world, lightShape,0);
+            col = col + deNan(color(r, world, lightShape,0));
             numRays++;
 
         }
@@ -166,7 +174,7 @@ int main(int argCount, char* argVector[]) {
     int nx, ny, ns, sp;
     nx = 400;
     ny = 400;
-    ns = 100;
+    ns = 500;
     sp = 10;
 
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
@@ -181,7 +189,7 @@ int main(int argCount, char* argVector[]) {
     //Vector4D lookat(0, 0, 0, 1);
     //float distToFocus = 10;
     //float aperature = 0.1;
-    Vector4D lookfrom(278, 278, -700, 1);
+    Vector4D lookfrom(278, 278, -750, 1);
     Vector4D lookat(278, 278, 0, 1);
     float distToFocus = 10;
     float aperature = 0;
