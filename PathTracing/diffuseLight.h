@@ -24,4 +24,6 @@ public:
     texture* emit;
 };
 
+
+
 #endif //S0008E_DIFFUSELIGHT_H

@@ -82,6 +82,25 @@ public:
     virtual Vector4D emitted(const ray& r_in, const hitRecord& rec, float u,  float v, const Vector4D& p) const { return Vector4D(0,0,0,1);}
 };
 
+
+
+class mediumMaterial : public material
+{
+public:
+    mediumMaterial(texture* a) : albedo(a) {}
+    bool scatter(const ray& r_in, const hitRecord& rec, scatterRecord& sRec) const override
+    {
+        ray scattered = ray(rec.p, randomInUnitSphere());
+        sRec.attenuation = albedo->value(rec.u, rec.v, rec.p);
+        sRec.specularRay = scattered;
+        sRec.pdfPtr = 0;
+        sRec.isSpecular = true;
+    }
+    texture* albedo;
+};
+
+
+
 class lambertian : public material
 {
 public:

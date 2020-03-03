@@ -9,3 +9,7 @@ compile_commands.json
 CTestTestfile.cmake
 PathTracing/.idea
 PathTracing/cmake-build-debug
+PathTracing/cmake-build-debug-wsl
+PathTracing/CmakeBuild
+
+
