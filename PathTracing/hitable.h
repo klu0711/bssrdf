@@ -12,6 +12,7 @@ struct hitRecord
     float v;
     Vector4D normal;
     material *matPtr;
+    bool insideMat = false;
 };
 
 class hitable

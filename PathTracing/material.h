@@ -90,11 +90,35 @@ public:
     mediumMaterial(texture* a) : albedo(a) {}
     bool scatter(const ray& r_in, const hitRecord& rec, scatterRecord& sRec) const override
     {
-        ray scattered = ray(rec.p, randomInUnitSphere());
-        sRec.attenuation = albedo->value(rec.u, rec.v, rec.p);
-        sRec.specularRay = scattered;
-        sRec.pdfPtr = 0;
-        sRec.isSpecular = true;
+
+
+        if(drand48() < 0.1 && rec.insideMat)
+        {
+            ray scattered = ray(rec.p, randomInUnitSphere());
+            sRec.attenuation = albedo->value(rec.u, rec.v, rec.p);
+            sRec.specularRay = scattered;
+            sRec.pdfPtr = 0;
+            sRec.isSpecular = true;
+            return true;
+        } else
+        {
+            sRec.isSpecular = false;
+            sRec.attenuation = albedo->value(rec.u, rec.v, rec.p);
+            sRec.pdfPtr = new cosinePdf(rec.normal);
+            return true;
+
+        }
+
+    }
+
+    float scatterPdf(const ray& r_in, const hitRecord& rec, const ray& scattered) const override
+    {
+        Vector4D temp = scattered.direction().normalize();
+        auto n = rec.normal;
+        float cosine = n.dotProduct(temp);
+        if(cosine < 0)
+            cosine = 0;
+        return cosine / RPI;
     }
     texture* albedo;
 };

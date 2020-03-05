@@ -29,6 +29,14 @@ bool medium::hit(const ray &r_in, float tmin, float tmax, hitRecord &rec) const
     bool db =  (drand48() < 0.00001);
     db = false;
     hitRecord rec1, rec2;
+
+    if(drand48() > 0.2)
+    {
+        if(boundary->hit(r_in, tmin, tmax, rec))
+        {
+            return true;
+        }
+    }
     if(boundary->hit(r_in, -FLT_MAX, FLT_MAX, rec1))
     {
         if(boundary->hit(r_in, rec1.t + 0.001, FLT_MAX, rec2))
@@ -51,6 +59,7 @@ bool medium::hit(const ray &r_in, float tmin, float tmax, hitRecord &rec) const
                 rec.p = r_in.pointAtParameter(rec.t);
                 rec.normal = Vector4D(1,0,0,0);
                 rec.matPtr = phaseFunction;
+                rec.insideMat = true;
                 return true;
             }
 
