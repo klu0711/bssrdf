@@ -26,10 +26,8 @@ public:
 
 bool medium::hit(const ray &r_in, float tmin, float tmax, hitRecord &rec) const
 {
-    bool db =  (drand48() < 0.00001);
-    db = false;
-    hitRecord rec1, rec2;
 
+    hitRecord rec1, rec2;
     if(drand48() > 0.2)
     {
         if(boundary->hit(r_in, tmin, tmax, rec))
@@ -41,7 +39,6 @@ bool medium::hit(const ray &r_in, float tmin, float tmax, hitRecord &rec) const
     {
         if(boundary->hit(r_in, rec1.t + 0.001, FLT_MAX, rec2))
         {
-    //if(db) assert(0);
             if(rec1.t < tmin)
                 rec1.t = tmin;
             if(rec2.t > tmax)
@@ -50,7 +47,6 @@ bool medium::hit(const ray &r_in, float tmin, float tmax, hitRecord &rec) const
                 return false;
             if(rec1.t < 0)
                 rec1.t = 0;
-
             float distanceInsideBounds = (rec2.t - rec1.t)*r_in.direction().length();
             float hitDistance = -(1/density)*log(drand48());
             if(hitDistance < distanceInsideBounds)

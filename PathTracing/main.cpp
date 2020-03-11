@@ -30,34 +30,6 @@ inline Vector4D deNan(const Vector4D& c)
     return temp;
 }
 
-
-hitable* generateScene()
-{
-    int spheres = 100;
-    hitable **list = new hitable*[103];
-    hitable ** sphereList = new hitable*[spheres];
-    hitable ** sphereList2 = new hitable*[spheres];
-    int b = 0;
-
-    texture* checker = new checker_texture(new constantTexture(Vector4D(0.2, 0.3, 0.1, 1)), new constantTexture(Vector4D(0.9, 0.9, 0.9, 1)));
-
-    for (int i = 0; i < spheres; ++i)
-    {
-        Vector4D center(20*(xorShift() - 0.5),0.2, 20*(xorShift() - 0.5), 1 );
-        if((center-Vector4D(4, 0.2, 0, 1)).length() > 0.9)
-        {
-            sphereList[b++] = new sphere(center, 0.2, new lambertian(new constantTexture(Vector4D(xorShift()*xorShift(), xorShift()*xorShift(), xorShift()*xorShift(), 1))));
-        }
-    }
-
-    list[0] = new bvhNode(sphereList, b, 0, 1);
-    list[1] = new sphere(Vector4D(0, -1000, 0, 1), 1000, new lambertian(checker));
-    list[2] = new xyRect(3, 5, 1, 3, -2, new diffuseLight(new constantTexture(Vector4D(4, 4, 4, 1))));
-
-
-    return new hitableList(list, 3);
-}
-
 hitable* cornellBox()
 {
     hitable** list = new hitable*[6];
@@ -78,8 +50,8 @@ hitable* cornellBox()
 
     hitable* box1 = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
     hitable* box2 = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, 0, 295, 1));
-    list[i++] = new medium(box1, 0.1, new constantTexture(Vector4D(0,0,0,0)));
-    list[i++] = new medium(box2, 0.1, new constantTexture(Vector4D(0,0,0,0)));
+    list[i++] = new medium(box1, 0.03, new constantTexture(Vector4D(0,0,0,0)));
+    list[i++] = new medium(box2, 0.03, new constantTexture(Vector4D(0,0,0,0)));
 
 
     return new hitableList(list, i);
@@ -181,21 +153,16 @@ int main(int argCount, char* argVector[]) {
     int nx, ny, ns, sp;
     nx = 400;
     ny = 400;
-    ns = 200;
+    ns = 500;
     sp = 10;
 
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
     Vector4D horizontal(4.0, 0,0,1);
     Vector4D vertical(0.0,2.0,0.0,1);
     Vector4D origin(0.0,0.0,0.0,1);
-
-    //hitable *world1 = random_scene(sp);
     hitable *world = cornellBox();
     float R = cos(M_PI/4);
-    //Vector4D lookfrom(13, 2, 3, 1);
-    //Vector4D lookat(0, 0, 0, 1);
-    //float distToFocus = 10;
-    //float aperature = 0.1;
+
     Vector4D lookfrom(278, 278, -750, 1);
     Vector4D lookat(278, 278, 0, 1);
     float distToFocus = 10;
