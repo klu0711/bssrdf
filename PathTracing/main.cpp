@@ -50,8 +50,8 @@ hitable* cornellBox()
 
     hitable* box1 = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 165, 165, 1), white), -18), Vector4D(130, 0, 65, 1));
     hitable* box2 = new translate(new rotateY(new box(Vector4D(0, 0, 0, 1), Vector4D(165, 330, 165, 1), white), 15), Vector4D(265, 0, 295, 1));
-    list[i++] = new medium(box1, 0.01, new constantTexture(Vector4D(0,0,0,0)));
-    list[i++] = new medium(box2, 0.01, new constantTexture(Vector4D(0,0,0,0)));
+    list[i++] = new medium(box1, 0.05, new constantTexture(Vector4D(0,0,0,0)));
+    list[i++] = new medium(box2, 0.05, new constantTexture(Vector4D(0,0,0,0)));
 
 
     return new hitableList(list, i);
@@ -152,9 +152,9 @@ int main(int argCount, char* argVector[]) {
 
     auto start = std::chrono::system_clock::now();
     int nx, ny, ns, sp;
-    nx = 600;
-    ny = 600;
-    ns = 600;
+    nx = 300;
+    ny = 300;
+    ns = 300;
     sp = 10;
 
     Vector4D lowerLeftCorner(-2.0, -1.0, -1.0, 1);
